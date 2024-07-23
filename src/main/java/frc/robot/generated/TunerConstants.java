@@ -22,12 +22,12 @@ public class TunerConstants {
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(1.0).withKI(0).withKD(0.0)
-        .withKS(0).withKV(1.5).withKA(0);
+        .withKP(0.75).withKI(0.2).withKD(0.00001)
+        .withKS(0).withKV(0.0).withKA(0);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains = new Slot0Configs()
-        .withKP(3).withKI(0).withKD(0)
+        .withKP(1.0).withKI(0).withKD(0)
         .withKS(0).withKV(0).withKA(0);
 
     // The closed-loop output type to use for the steer motors;
@@ -49,7 +49,7 @@ public class TunerConstants {
             new CurrentLimitsConfigs()
                 // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(40)
+                .withStatorCurrentLimit(60)
                 .withStatorCurrentLimitEnable(true)
         );
     private static final CANcoderConfiguration cancoderInitialConfigs = new CANcoderConfiguration();
@@ -101,7 +101,8 @@ public class TunerConstants {
             .withDriveInertia(kDriveInertia)
             .withSteerFrictionVoltage(kSteerFrictionVoltage)
             .withDriveFrictionVoltage(kDriveFrictionVoltage)
-            .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
+        //     .withFeedbackSource(SteerFeedbackType.FusedCANcoder)
+            .withFeedbackSource(SteerFeedbackType.RemoteCANcoder)
             .withCouplingGearRatio(kCoupleRatio)
             .withDriveMotorInitialConfigs(driveInitialConfigs)
             .withSteerMotorInitialConfigs(steerInitialConfigs)
@@ -115,8 +116,8 @@ public class TunerConstants {
     private static final double kFrontLeftEncoderOffset = 0.1953125;
     private static final boolean kFrontLeftSteerInvert = false;
 
-    private static final double kFrontLeftXPosInches = 12.5;
-    private static final double kFrontLeftYPosInches = 14;
+    private static final double kFrontLeftXPosInches = 8.875;
+    private static final double kFrontLeftYPosInches = 9.875;
 
     // Front Right
     private static final int kFrontRightDriveMotorId = 2;
@@ -125,8 +126,8 @@ public class TunerConstants {
     private static final double kFrontRightEncoderOffset = -0.38671875;
     private static final boolean kFrontRightSteerInvert = false;
 
-    private static final double kFrontRightXPosInches = 12.5;
-    private static final double kFrontRightYPosInches = -14;
+    private static final double kFrontRightXPosInches = 8.875;
+    private static final double kFrontRightYPosInches = -9.875;
 
     // Back Left
     private static final int kBackLeftDriveMotorId = 3;
@@ -135,8 +136,8 @@ public class TunerConstants {
     private static final double kBackLeftEncoderOffset = -0.375;
     private static final boolean kBackLeftSteerInvert = false;
 
-    private static final double kBackLeftXPosInches = -12.5;
-    private static final double kBackLeftYPosInches = 14;
+    private static final double kBackLeftXPosInches = -8.875;
+    private static final double kBackLeftYPosInches = 9.875;
 
     // Back Right
     private static final int kBackRightDriveMotorId = 1;
@@ -145,8 +146,8 @@ public class TunerConstants {
     private static final double kBackRightEncoderOffset = 0.30615234375;
     private static final boolean kBackRightSteerInvert = false;
 
-    private static final double kBackRightXPosInches = -12.5;
-    private static final double kBackRightYPosInches = -14;
+    private static final double kBackRightXPosInches = -8.875;
+    private static final double kBackRightYPosInches = -9.875;
 
 
     private static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
