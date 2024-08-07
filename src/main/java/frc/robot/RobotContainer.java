@@ -32,7 +32,7 @@ public class RobotContainer {
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
-  private final Intake intake = new Intake();
+  // private final Intake intake = new Intake();
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -51,9 +51,9 @@ public class RobotContainer {
             .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-    joystick.leftTrigger(0.05).whileTrue(
-      intake.run(joystick.getLeftTriggerAxis())
-    );
+    // joystick.leftTrigger(0.05).whileTrue(
+    //   intake.run(joystick.getLeftTriggerAxis())
+    // );
 
     joystick.a().whileTrue(drivetrain.applyRequest(
       () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
