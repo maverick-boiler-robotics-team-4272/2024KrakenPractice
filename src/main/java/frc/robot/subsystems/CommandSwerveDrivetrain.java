@@ -83,10 +83,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
     }
 
-    public void resetPos(Pose2d pose) {
-        m_odometry.resetPosition(m_pigeon2.getRotation2d(), m_modulePositions, pose);
-    }
-
     private void initPathPlanner() {
         AutoBuilder.configureHolonomic(
             ()->this.getState().Pose, // Robot pose supplier
@@ -113,8 +109,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             },
             this // Reference to this subsystem to set requirements
         );
-
-        System.out.println("auto");
     }
 
     @Override
@@ -132,13 +126,5 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 hasAppliedOperatorPerspective = true;
             });
         }
-    }
-
-    private void driveRobotRelative(ChassisSpeeds speeds) {
-        applyRequest(() -> 
-            new SwerveRequest.RobotCentric()
-                .withVelocityX(speeds.vxMetersPerSecond)
-                .withVelocityY(speeds.vyMetersPerSecond)
-        );
     }
 }
