@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.TunerConstants;
 
+import static frc.robot.constants.AutoConstants.*;
+
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
  * subsystem so it can be used in command-based projects easily.
@@ -90,10 +92,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             this::getCurrentChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             (speeds)->this.setControl(AutoRequest.withSpeeds(speeds)), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
-                    TunerConstants.kSpeedAt12VoltsMps, // Max module speed, in m/s
-                    0.4, // Drive base radius in meters. Distance from robot center to furthest module.
+                    new PIDConstants(TRANSLATION_P, TRANSLATION_I, TRANSLATION_D), // Translation PID constants
+                    new PIDConstants(ROTATION_P, ROTATION_I, ROTATION_D), // Rotation PID constants
+                    TRANSLATION_MAX, // Max module speed, in m/s
+                    DRIVEBASE_RADIUS, // Drive base radius in meters. Distance from robot center to furthest module.
                     new ReplanningConfig() // Default path replanning config. See the API for the options here
             ),
             () -> {
@@ -103,7 +105,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
               var alliance = DriverStation.getAlliance();
               if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Blue;
+                return alliance.get() == DriverStation.Alliance.Red;
               }
               return false;
             },
