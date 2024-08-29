@@ -15,7 +15,7 @@ public class Intake extends SubsystemBase {
     public Intake() {
         intakeMotor = VortexBuilder.create(intakeId)
             .withVoltageCompensation(11)
-            .withCurrentLimit(40)
+            .withCurrentLimit(80)
             .withIdleMode(IdleMode.kBrake)
             .withPeriodicFramerate(PeriodicFrame.kStatus1, 500)
             .withPeriodicFramerate(PeriodicFrame.kStatus2, 500)
