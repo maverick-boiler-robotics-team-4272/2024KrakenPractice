@@ -18,8 +18,8 @@ public class Intake extends SubsystemBase {
         intakeMotor.clearFaults();
     }
 
-    public Command run(DoubleSupplier speed) {
-        return run(() -> intakeMotor.set(0.5));
+    public void run(double speed) {
+        intakeMotor.set(0.5);
     }
 
     CANSparkFlex intakeMotor;
