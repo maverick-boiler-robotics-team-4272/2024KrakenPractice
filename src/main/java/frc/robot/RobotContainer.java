@@ -25,7 +25,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeState;
+import frc.robot.subsystems.intake.states.IntakeState;
+import frc.robot.subsystems.intake.states.OutakeState;
 
 public class RobotContainer {
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
@@ -59,6 +60,10 @@ public class RobotContainer {
 
     joystick.leftTrigger(0.1).whileTrue(
       new IntakeState(intake, joystick::getLeftTriggerAxis)
+    );
+
+    joystick.rightTrigger(0.1).whileTrue(
+      new OutakeState(intake, joystick::getRightTriggerAxis)
     );
 
     joystick.a().whileTrue(drivetrain.applyRequest(

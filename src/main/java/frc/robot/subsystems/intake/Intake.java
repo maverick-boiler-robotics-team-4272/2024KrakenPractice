@@ -17,12 +17,12 @@ public class Intake extends SubsystemBase {
             .withVoltageCompensation(11)
             .withCurrentLimit(80)
             .withIdleMode(IdleMode.kBrake)
-            .withPeriodicFramerate(PeriodicFrame.kStatus1, 500)
-            .withPeriodicFramerate(PeriodicFrame.kStatus2, 500)
-            .withPeriodicFramerate(PeriodicFrame.kStatus3, 500)
-            .withPeriodicFramerate(PeriodicFrame.kStatus4, 500)
-            .withPeriodicFramerate(PeriodicFrame.kStatus5, 500)
-            .withPeriodicFramerate(PeriodicFrame.kStatus6, 500)
+            // .withPeriodicFramerate(PeriodicFrame.kStatus1, 500)
+            // .withPeriodicFramerate(PeriodicFrame.kStatus2, 500)
+            // .withPeriodicFramerate(PeriodicFrame.kStatus3, 500)
+            // .withPeriodicFramerate(PeriodicFrame.kStatus4, 500)
+            // .withPeriodicFramerate(PeriodicFrame.kStatus5, 500)
+            // .withPeriodicFramerate(PeriodicFrame.kStatus6, 500)
             .build();
     }
 
