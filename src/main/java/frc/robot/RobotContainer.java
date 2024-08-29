@@ -82,6 +82,7 @@ public class RobotContainer {
     autoTab.add(autoChooser).withSize(2, 1);
 
     autoChooser.setDefaultOption("TestAuto", new PathPlannerAuto("TestAuto"));
+    autoChooser.addOption("Circle Auto", new PathPlannerAuto("Circle Auto"));
 
     field = new Field2d();
     autoTab.add("Field", field).withSize(6, 4);
@@ -98,8 +99,6 @@ public class RobotContainer {
         // Do whatever you want with the pose here
         if(DriverStation.isAutonomousEnabled()) {
           field.getObject("target pose").setPose(pose);
-        } else {
-          field.getObject("target pose").setPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
         }
     });
 
