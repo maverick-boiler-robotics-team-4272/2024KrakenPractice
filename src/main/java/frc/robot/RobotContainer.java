@@ -14,6 +14,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -80,7 +81,7 @@ public class RobotContainer {
     autoTab = Shuffleboard.getTab("Auto");
     autoTab.add(autoChooser).withSize(2, 1);
 
-    autoChooser.addOption("TestAuto", new PathPlannerAuto("TestAuto"));
+    autoChooser.setDefaultOption("TestAuto", new PathPlannerAuto("TestAuto"));
 
     field = new Field2d();
     autoTab.add("Field", field).withSize(6, 4);
@@ -88,13 +89,18 @@ public class RobotContainer {
     // Logging callback for current robot pose
     PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
       // Do whatever you want with the pose here
-      field.setRobotPose(pose);
+      if(DriverStation.isAutonomousEnabled())
+        field.setRobotPose(pose);
     });
 
     // Logging callback for target robot pose
     PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
         // Do whatever you want with the pose here
-        field.getObject("target pose").setPose(pose);
+        if(DriverStation.isAutonomousEnabled()) {
+          field.getObject("target pose").setPose(pose);
+        } else {
+          field.getObject("target pose").setPose(new Pose2d(0, 0, Rotation2d.fromDegrees(0)));
+        }
     });
 
     // Logging callback for the active path, this is sent as a list of poses
@@ -103,10 +109,13 @@ public class RobotContainer {
         field.getObject("path").setPoses(poses);
     });
 
+    drivetrain.setLogCurrentPos((pose) -> {
+      field.setRobotPose(pose);
+    });
+
   }
 
   public Command getAutonomousCommand() {
-    System.out.println(autoChooser.getSelected().getName());
     return autoChooser.getSelected();
   }
 }
