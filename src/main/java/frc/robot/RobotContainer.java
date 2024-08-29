@@ -20,9 +20,12 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeState;
 
 public class RobotContainer {
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
@@ -54,9 +57,9 @@ public class RobotContainer {
             .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-    // joystick.leftTrigger().whileTrue(
-    //   intake.run(() -> joystick.getLeftTriggerAxis())
-    // );
+    // joystick.leftTrigger(0.1).whileTrue(
+    //   new IntakeState(intake, joystick::getLeftTriggerAxis).alongWith(new PrintCommand("Intaking"))
+    // ).onFalse(new PrintCommand("off"));
 
     joystick.a().whileTrue(drivetrain.applyRequest(
       () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
