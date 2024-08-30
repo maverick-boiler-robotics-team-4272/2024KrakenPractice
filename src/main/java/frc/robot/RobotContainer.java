@@ -59,11 +59,11 @@ public class RobotContainer {
         ));
 
     joystick.leftTrigger(0.1).whileTrue(
-      new IntakeState(intake, joystick::getLeftTriggerAxis)
+      new IntakeState(intake, 0.9)
     );
 
     joystick.rightTrigger(0.1).whileTrue(
-      new OutakeState(intake, joystick::getRightTriggerAxis)
+      new OutakeState(intake, 0.9)
     );
 
     joystick.a().whileTrue(drivetrain.applyRequest(

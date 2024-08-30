@@ -7,16 +7,16 @@ import frc.robot.subsystems.intake.Intake;
 
 public class OutakeState extends Command {
     Intake intake;
-    DoubleSupplier speed;
+    double speed;
 
-    public OutakeState(Intake intake, DoubleSupplier speed) {
+    public OutakeState(Intake intake, double speed) {
         this.intake = intake;
         this.speed = speed;
     }
 
     @Override
     public void initialize() {
-        intake.run(-speed.getAsDouble());
+        intake.run(-speed);
     }
 
     @Override
