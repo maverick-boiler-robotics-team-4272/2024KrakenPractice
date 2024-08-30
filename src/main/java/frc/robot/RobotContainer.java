@@ -8,6 +8,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
@@ -82,6 +83,7 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
+    registerNamedCommands();
 
     autoChooser = AutoBuilder.buildAutoChooser();
 
@@ -90,6 +92,7 @@ public class RobotContainer {
 
     autoChooser.setDefaultOption("TestAuto", new PathPlannerAuto("TestAuto"));
     autoChooser.addOption("Circle Auto", new PathPlannerAuto("Circle Auto"));
+    autoChooser.addOption("Three Note Intake", new PathPlannerAuto("Three Note Intake"));
 
     field = new Field2d();
     autoTab.add("Field", field).withSize(6, 4);
@@ -119,6 +122,10 @@ public class RobotContainer {
       field.setRobotPose(pose);
     });
 
+  }
+
+  private void registerNamedCommands() {
+      NamedCommands.registerCommand("Intake", new IntakeState(intake, 0.9));
   }
 
   public Command getAutonomousCommand() {

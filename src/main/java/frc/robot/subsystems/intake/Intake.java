@@ -20,6 +20,11 @@ public class Intake extends SubsystemBase {
             // .withPeriodicFramerate(PeriodicFrame.kStatus5, 500)
             // .withPeriodicFramerate(PeriodicFrame.kStatus6, 500)
             .build();
+            try {
+                Thread.sleep(300);
+            } catch(InterruptedException e) {
+                
+            }
     }
 
     public void run(double speed) {
