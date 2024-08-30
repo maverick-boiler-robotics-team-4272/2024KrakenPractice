@@ -8,5 +8,7 @@ public class State<T extends Subsystem> extends Command {
 
     public State(T requiredSubsystem) {
         this.requiredSubsystem = requiredSubsystem;
+
+        addRequirements(requiredSubsystem);
     }
 }
