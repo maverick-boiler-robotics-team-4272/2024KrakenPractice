@@ -9,22 +9,14 @@ import static frc.robot.constants.SubsystemConstants.IntakeConstants.*;
 
 public class Intake extends SubsystemBase {
     public Intake() {
-        intakeMotor = VortexBuilder.create(intakeId)
+        intakeMotor = VortexBuilder.create(INTAKE_ID)
             .withVoltageCompensation(11)
-            .withCurrentLimit(80)
+            .withCurrentLimit(CURRENT_LIMIT)
             .withIdleMode(IdleMode.kBrake)
-            // .withPeriodicFramerate(PeriodicFrame.kStatus1, 500)
-            // .withPeriodicFramerate(PeriodicFrame.kStatus2, 500)
-            // .withPeriodicFramerate(PeriodicFrame.kStatus3, 500)
-            // .withPeriodicFramerate(PeriodicFrame.kStatus4, 500)
-            // .withPeriodicFramerate(PeriodicFrame.kStatus5, 500)
-            // .withPeriodicFramerate(PeriodicFrame.kStatus6, 500)
             .build();
             try {
-                Thread.sleep(300);
-            } catch(InterruptedException e) {
-                
-            }
+                Thread.sleep(30);
+            } catch(InterruptedException e) {}
     }
 
     public void run(double speed) {
