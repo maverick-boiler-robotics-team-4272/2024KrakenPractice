@@ -13,6 +13,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -22,6 +23,9 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.constants.SubsystemConstants;
+import frc.robot.utils.limelight.LimelightHelpers;
+
 import static frc.robot.constants.AutoConstants.*;
 
 /**
@@ -51,6 +55,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
 
         initPathPlanner();
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e){}
+
+        SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.configure(SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE);
     }
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
@@ -60,6 +70,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
         
         initPathPlanner();
+        SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.configure(SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE);
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -131,6 +142,20 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                 : BlueAlliancePerspectiveRotation);
                 hasAppliedOperatorPerspective = true;
             });
+        }
+
+        LimelightHelpers.PoseEstimate limelightMeasurement = SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.getBotPoseEstimate();
+
+        if(limelightMeasurement != null) {
+            if(limelightMeasurement.tagCount >= 2) {
+                setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+                addVisionMeasurement(
+                    limelightMeasurement.pose,
+                    limelightMeasurement.timestampSeconds
+                );
+            }
+        } else {
+            System.out.println("Null measurment");
         }
 
         if (DriverStation.isTeleop() && logCurrentPos != null) {
