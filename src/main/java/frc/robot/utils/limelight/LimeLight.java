@@ -10,7 +10,7 @@ public class LimeLight {
     public LimeLight(String tableName) {
         this.tableName = tableName;
 
-        configure(null);
+        configure(new Pose3d());
     }
 
     public void configure(Pose3d cameraOffset) {
@@ -32,10 +32,10 @@ public class LimeLight {
     }
 
     public Pose2d getBotPose() {
-        return (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) ? LimelightHelpers.getBotPose2d_wpiBlue(tableName) : LimelightHelpers.getBotPose2d_wpiRed(tableName);
+        return (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue || !DriverStation.isDSAttached()) ? LimelightHelpers.getBotPose2d_wpiBlue(tableName) : LimelightHelpers.getBotPose2d_wpiRed(tableName);
     }
 
     public LimelightHelpers.PoseEstimate getBotPoseEstimate() {
-        return (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) ? LimelightHelpers.getBotPoseEstimate_wpiBlue(tableName) : LimelightHelpers.getBotPoseEstimate_wpiRed(tableName);
+        return (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue || !DriverStation.isDSAttached()) ? LimelightHelpers.getBotPoseEstimate_wpiBlue(tableName) : LimelightHelpers.getBotPoseEstimate_wpiRed(tableName);
     }
 }
