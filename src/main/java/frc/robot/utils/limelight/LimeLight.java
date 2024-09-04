@@ -7,9 +7,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 public class LimeLight {
     private String tableName;
     
-    public LimeLight(String tableName, Pose3d cameraOffset) {
+    public LimeLight(String tableName) {
         this.tableName = tableName;
 
+        configure(null);
+    }
+
+    public void configure(Pose3d cameraOffset) {
         LimelightHelpers.setCameraPose_RobotSpace(
             tableName, 
             cameraOffset.getX(), 
@@ -21,6 +25,10 @@ public class LimeLight {
         );
 
         LimelightHelpers.setLEDMode_ForceOff(tableName);
+    }
+
+    public void turnOnLeds() {
+        LimelightHelpers.setLEDMode_ForceOn(tableName);
     }
 
     public Pose2d getBotPose() {
