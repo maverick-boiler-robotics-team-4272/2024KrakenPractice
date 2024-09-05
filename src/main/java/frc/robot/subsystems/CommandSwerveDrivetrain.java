@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.Utils;
@@ -12,6 +13,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -21,6 +23,10 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.constants.SubsystemConstants;
+import frc.robot.utils.limelight.LimelightHelpers;
+
+import static frc.robot.constants.AutoConstants.*;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
@@ -38,6 +44,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean hasAppliedOperatorPerspective = false;
 
+    private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
+
+    private Consumer<Pose2d> logCurrentPos;
+
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         if (Utils.isSimulation()) {
@@ -45,6 +55,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
 
         initPathPlanner();
+
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e){}
+
+        SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.configure(SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE);
     }
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
@@ -54,10 +70,20 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
         
         initPathPlanner();
+        SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.configure(SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE);
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
+    }
+
+    public Command reset() {
+        return runOnce(
+            () -> {
+                seedFieldRelative();
+                getPigeon2().setYaw(0);
+            }
+        );
     }
 
     private void startSimThread() {
@@ -75,25 +101,21 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         m_simNotifier.startPeriodic(kSimLoopPeriod);
     }
 
-    public ChassisSpeeds getSpeeds() {
-        return getState().speeds;
-    }
-
-    public void resetPos(Pose2d pose) {
-        m_odometry.resetPosition(m_pigeon2.getRotation2d(), m_modulePositions, pose);
+    public ChassisSpeeds getCurrentChassisSpeeds() {
+        return m_kinematics.toChassisSpeeds(getState().ModuleStates);
     }
 
     private void initPathPlanner() {
         AutoBuilder.configureHolonomic(
-            this.m_odometry::getEstimatedPosition, // Robot pose supplier
-            this::resetPos, // Method to reset odometry (will be called if your auto has a starting pose)
-            () -> this.getSpeeds(), // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+            ()->this.getState().Pose, // Robot pose supplier
+            this::seedFieldRelative, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getCurrentChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            (speeds)->this.setControl(AutoRequest.withSpeeds(speeds)), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
             new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
-                    4.5, // Max module speed, in m/s
-                    0.4, // Drive base radius in meters. Distance from robot center to furthest module.
+                    new PIDConstants(TRANSLATION_P, TRANSLATION_I, TRANSLATION_D), // Translation PID constants
+                    new PIDConstants(ROTATION_P, ROTATION_I, ROTATION_D), // Rotation PID constants
+                    TRANSLATION_MAX, // Max module speed, in m/s
+                    DRIVEBASE_RADIUS, // Drive base radius in meters. Distance from robot center to furthest module.
                     new ReplanningConfig() // Default path replanning config. See the API for the options here
             ),
             () -> {
@@ -111,6 +133,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         );
     }
 
+    public void setLogCurrentPos(Consumer<Pose2d> logCurrent) {
+        this.logCurrentPos = logCurrent;
+    }
+
     @Override
     public void periodic() {
         /* Periodically try to apply the operator perspective */
@@ -126,13 +152,23 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 hasAppliedOperatorPerspective = true;
             });
         }
-    }
 
-    private void driveRobotRelative(ChassisSpeeds speeds) {
-        applyRequest(() -> 
-            new SwerveRequest.RobotCentric()
-                .withVelocityX(speeds.vxMetersPerSecond)
-                .withVelocityY(speeds.vyMetersPerSecond)
-        );
+        LimelightHelpers.PoseEstimate limelightMeasurement = SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.getBotPoseEstimate();
+
+        if(limelightMeasurement != null) {
+            if(limelightMeasurement.tagCount >= 2) {
+                setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+                addVisionMeasurement(
+                    limelightMeasurement.pose,
+                    limelightMeasurement.timestampSeconds
+                );
+            }
+        } else {
+            System.out.println("Null measurment");
+        }
+
+        if (DriverStation.isTeleop() && logCurrentPos != null) {
+            logCurrentPos.accept(this.getState().Pose);
+        }
     }
 }
