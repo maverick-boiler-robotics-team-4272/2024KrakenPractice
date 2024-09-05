@@ -22,6 +22,12 @@
           "data": {
             "pathName": "Circle"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Circle End"
+          }
         }
       ]
     }
