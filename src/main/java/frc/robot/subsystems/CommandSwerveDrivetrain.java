@@ -77,6 +77,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
+    public Command reset() {
+        return runOnce(
+            () -> {
+                seedFieldRelative();
+                getPigeon2().setYaw(0);
+            }
+        );
+    }
+
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 

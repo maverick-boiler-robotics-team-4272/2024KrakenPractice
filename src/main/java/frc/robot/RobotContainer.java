@@ -73,7 +73,7 @@ public class RobotContainer {
     joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
 
     // reset the field-centric heading on left bumper press
-    joystick.b ().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+    joystick.b ().onTrue(drivetrain.reset());
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -93,6 +93,7 @@ public class RobotContainer {
     autoChooser.setDefaultOption("TestAuto", new PathPlannerAuto("TestAuto"));
     autoChooser.addOption("Circle Auto", new PathPlannerAuto("Circle Auto"));
     autoChooser.addOption("Three Note Intake", new PathPlannerAuto("Three Note Intake"));
+    autoChooser.addOption("LimeLightTest", new PathPlannerAuto("LimeLightTest"));
 
     field = new Field2d();
     autoTab.add("Field", field).withSize(6, 4);
