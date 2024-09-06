@@ -18,14 +18,14 @@ public class Shooter extends SubsystemBase {
     public Shooter() {
         motor1 = VortexBuilder.create(SHOOTER_MOTOR_TOP_ID)
             .withCurrentLimit(40)
-            .withIdleMode(IdleMode.kCoast)
-            .withInversion(false)
+            .withIdleMode(IdleMode.kBrake)
+            .withInversion(true)
             .build();
 
         motor2 = VortexBuilder.create(SHOOTER_MOTOR_BOTTOM_ID)
             .withCurrentLimit(40)
-            .withIdleMode(IdleMode.kCoast)
-            .withInversion(true)
+            .withIdleMode(IdleMode.kBrake)
+            .withInversion(false)
             .build();
 
         feedMotor = NeoBuilder.create(FEED_MOTOR_ID)
