@@ -27,6 +27,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.states.IntakeState;
 import frc.robot.subsystems.intake.states.OutakeState;
+import frc.robot.subsystems.shooter.ShootState;
+import frc.robot.subsystems.shooter.Shooter;
 
 public class RobotContainer {
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
@@ -40,6 +42,7 @@ public class RobotContainer {
   private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
   private final Intake intake = new Intake();
+  private final Shooter shooter = new Shooter();
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -73,7 +76,11 @@ public class RobotContainer {
     joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
 
     // reset the field-centric heading on left bumper press
-    joystick.b ().onTrue(drivetrain.reset());
+    joystick.b().onTrue(drivetrain.reset());
+
+    joystick.leftBumper().whileTrue(
+      new ShootState(shooter, 0.95, ()->joystick.rightBumper().getAsBoolean())
+    );
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
