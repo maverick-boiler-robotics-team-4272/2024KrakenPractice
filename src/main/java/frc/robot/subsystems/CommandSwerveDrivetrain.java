@@ -163,8 +163,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     limelightMeasurement.timestampSeconds
                 );
             }
-        } else {
-            System.out.println("Null measurment");
         }
 
         if (DriverStation.isTeleop() && logCurrentPos != null) {
