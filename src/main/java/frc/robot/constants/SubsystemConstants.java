@@ -28,8 +28,8 @@ public class SubsystemConstants {
     }
 
     public static class ShooterConstants {
-        public static final int SHOOTER_MOTOR_TOP_ID = 16;
-        public static final int SHOOTER_MOTOR_BOTTOM_ID = 26;
+        public static final int SHOOTER_MOTOR_TOP_ID = 26;
+        public static final int SHOOTER_MOTOR_BOTTOM_ID = 16;
         public static final int FEED_MOTOR_ID = 17;
     }
 }
