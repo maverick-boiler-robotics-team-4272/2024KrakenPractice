@@ -1,7 +1,8 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.shooter.states;
 
 import java.util.function.BooleanSupplier;
 
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.utils.commandUtils.State;
 
 public class ShootState extends State<Shooter> {

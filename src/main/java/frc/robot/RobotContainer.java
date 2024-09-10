@@ -22,13 +22,13 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.commands.IntakeFeedCommand;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.states.IntakeState;
-import frc.robot.subsystems.intake.states.OutakeState;
-import frc.robot.subsystems.shooter.ShootState;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.states.ShootState;
 
 public class RobotContainer {
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
@@ -62,18 +62,18 @@ public class RobotContainer {
         ));
 
     joystick.leftTrigger(0.1).whileTrue(
-      new IntakeState(intake, 0.9)
+      new IntakeFeedCommand(intake, shooter, 0.9, 0.8)
     );
 
     joystick.rightTrigger(0.1).whileTrue(
-      new OutakeState(intake, 0.9)
+      new IntakeFeedCommand(intake, shooter, -0.9, -0.5)
     );
 
     joystick.a().whileTrue(drivetrain.applyRequest(
       () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
     ));
 
-    joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
+    // joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
 
     // reset the field-centric heading on left bumper press
     joystick.b().onTrue(drivetrain.reset());
