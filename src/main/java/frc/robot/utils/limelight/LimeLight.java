@@ -1,5 +1,7 @@
 package frc.robot.utils.limelight;
 
+import static frc.robot.constants.UniversalConstants.isRedSide;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -32,16 +34,10 @@ public class LimeLight {
     }
 
     public Pose2d getBotPose() {
-        if(!DriverStation.isDSAttached()) {
-            return new Pose2d();
-        }
-        return (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) ? LimelightHelpers.getBotPose2d_wpiBlue(tableName) : LimelightHelpers.getBotPose2d_wpiRed(tableName);
+        return (!isRedSide()) ? LimelightHelpers.getBotPose2d_wpiBlue(tableName) : LimelightHelpers.getBotPose2d_wpiRed(tableName);
     }
 
     public LimelightHelpers.PoseEstimate getBotPoseEstimate() {
-        if(!DriverStation.isDSAttached()) {
-            return null;
-        }
-        return (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) ? LimelightHelpers.getBotPoseEstimate_wpiBlue(tableName) : LimelightHelpers.getBotPoseEstimate_wpiRed(tableName);
+        return (!isRedSide()) ? LimelightHelpers.getBotPoseEstimate_wpiBlue(tableName) : LimelightHelpers.getBotPoseEstimate_wpiRed(tableName);
     }
 }

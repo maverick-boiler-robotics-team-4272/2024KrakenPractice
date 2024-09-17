@@ -28,6 +28,7 @@ import frc.robot.constants.SubsystemConstants;
 import frc.robot.utils.limelight.LimelightHelpers;
 
 import static frc.robot.constants.AutoConstants.*;
+import static frc.robot.constants.UniversalConstants.isRedSide;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
@@ -136,11 +137,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
               // This will flip the path being followed to the red side of the field.
               // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-              }
-              return false;
+              return isRedSide();
             },
             this // Reference to this subsystem to set requirements
         );
