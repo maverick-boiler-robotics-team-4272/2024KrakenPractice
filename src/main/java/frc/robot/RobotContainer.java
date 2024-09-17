@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.IntakeFeedCommand;
 import frc.robot.constants.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.states.IntakeState;
 import frc.robot.subsystems.shooter.Shooter;
@@ -134,6 +134,7 @@ public class RobotContainer {
 
   private void registerNamedCommands() {
       NamedCommands.registerCommand("Intake", new IntakeState(intake, 0.9));
+      NamedCommands.registerCommand("To Zero", drivetrain.pathFind(new Pose2d()));
   }
 
   public Command getAutonomousCommand() {

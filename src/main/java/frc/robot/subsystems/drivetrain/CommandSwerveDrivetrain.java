@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.drivetrain;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -9,6 +9,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -75,6 +76,18 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
+    }
+
+    public Command pathFind(Pose2d target) {
+        return AutoBuilder.pathfindToPose(
+            target, 
+            new PathConstraints(
+                TRANSLATION_MAX,
+                TRANSLATION_MAX_A,
+                ROTATION_MAX.getRadians(), 
+                ROTATION_MAX_A.getRadians()
+            )
+        );
     }
 
     public Command reset() {
