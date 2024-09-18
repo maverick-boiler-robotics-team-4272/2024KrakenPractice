@@ -24,7 +24,7 @@ public class ShootState extends State<Shooter> {
     @Override
     public void execute() {
         if(feed.getAsBoolean()) {
-            requiredSubsystem.feed(0.9);
+            requiredSubsystem.feed(0.75);
         }
     }
 
