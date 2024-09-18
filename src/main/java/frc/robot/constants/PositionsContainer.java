@@ -13,6 +13,8 @@ public class PositionsContainer {
     public final Rotation2d TO_DRIVERSTATION;
     public final Pose2d TRAP_STAGE_POSE;
 
+    public final Pose2d SHOT_POSITION;
+
     public final Rotation2d TO_SOURCE;
 
     public PositionsContainer(String side) {
@@ -24,6 +26,8 @@ public class PositionsContainer {
         AMP_POSE = new Pose2d(red ? FIELD_WIDTH_METERS - Meters.convertFrom(72.5, Inches) : Meters.convertFrom(72.5, Inches), Meters.convertFrom(300, Inches), new Rotation2d(Math.PI / 2));;
         TRAP_STAGE_POSE = new Pose2d(red ? FIELD_WIDTH_METERS - 4.20 : 4.20, 2.90, Rotation2d.fromDegrees(red ? 120 : 60));
         TO_DRIVERSTATION = Rotation2d.fromDegrees(red ? 0 : 180);
+
+        SHOT_POSITION = new Pose2d(red ? FIELD_WIDTH_METERS - 1.90 : 1.90, 5.56, Rotation2d.fromDegrees(red ? 0 : 180));
 
         TO_SOURCE = Rotation2d.fromDegrees(red ? 60.0 : 120.0);
     }

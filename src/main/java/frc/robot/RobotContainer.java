@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.IntakeFeedCommand;
+import frc.robot.commands.ShootCommand;
 import frc.robot.constants.TunerConstants;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.intake.Intake;
@@ -86,6 +87,10 @@ public class RobotContainer {
 
     joystick.leftBumper().whileTrue(
       new ShootState(shooter, 0.95, ()->joystick.rightBumper().getAsBoolean())
+    );
+
+    joystick.rightBumper().whileTrue(
+      new ShootCommand(drivetrain, shooter)
     );
 
     if (Utils.isSimulation()) {
