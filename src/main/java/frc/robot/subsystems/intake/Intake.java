@@ -7,7 +7,17 @@ import frc.robot.utils.hardware.VortexBuilder;
 
 import static frc.robot.constants.SubsystemConstants.IntakeConstants.*;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public class Intake extends SubsystemBase {
+    @AutoLog
+    public static class IntakeInputs {
+        double speed;
+    }
+
+    CANSparkFlex intakeMotor;
+    IntakeInputsAutoLogged inputs = new IntakeInputsAutoLogged();
+
     public Intake() {
         intakeMotor = VortexBuilder.create(INTAKE_ID)
             .withVoltageCompensation(11)
@@ -17,11 +27,12 @@ public class Intake extends SubsystemBase {
             try {
                 Thread.sleep(30);
             } catch(InterruptedException e) {}
+
+        inputs.speed = 0;
     }
 
     public void run(double speed) {
+        inputs.speed = speed;
         intakeMotor.set(speed);
     }
-
-    CANSparkFlex intakeMotor;
 }
