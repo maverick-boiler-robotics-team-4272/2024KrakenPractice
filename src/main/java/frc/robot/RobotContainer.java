@@ -48,8 +48,8 @@ public class RobotContainer {
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
-  private final Intake intake = new Intake();
-  private final Shooter shooter = new Shooter();
+  // private final Intake intake = new Intake();
+  // private final Shooter shooter = new Shooter();
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -68,13 +68,13 @@ public class RobotContainer {
             .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-    joystick.leftTrigger(0.1).whileTrue(
-      new IntakeFeedCommand(intake, shooter, 0.9, 0.8)
-    );
+    // joystick.leftTrigger(0.1).whileTrue(
+    //   new IntakeFeedCommand(intake, shooter, 0.9, 0.8)
+    // );
 
-    joystick.rightTrigger(0.1).whileTrue(
-      new IntakeFeedCommand(intake, shooter, -0.9, -0.5)
-    );
+    // joystick.rightTrigger(0.1).whileTrue(
+    //   new IntakeFeedCommand(intake, shooter, -0.9, -0.5)
+    // );
 
     joystick.a().whileTrue(drivetrain.applyRequest(
       () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
@@ -85,13 +85,13 @@ public class RobotContainer {
     // reset the field-centric heading on left bumper press
     joystick.b().onTrue(drivetrain.reset());
 
-    joystick.leftBumper().whileTrue(
-      new ShootState(shooter, 0.95, ()->joystick.rightBumper().getAsBoolean())
-    );
+    // joystick.leftBumper().whileTrue(
+    //   new ShootState(shooter, 0.95, ()->joystick.rightBumper().getAsBoolean())
+    // );
 
-    joystick.rightBumper().whileTrue(
-      new ShootCommand(drivetrain, shooter)
-    );
+    // joystick.rightBumper().whileTrue(
+    //   new ShootCommand(drivetrain, shooter)
+    // );
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -144,7 +144,7 @@ public class RobotContainer {
   }
 
   private void registerNamedCommands() {
-      NamedCommands.registerCommand("Intake", new IntakeState(intake, 0.9));
+      // NamedCommands.registerCommand("Intake", new IntakeState(intake, 0.9));
       NamedCommands.registerCommand("ToAmp", Commands.defer(
         ()->drivetrain.pathFind(getAlliancePositions().AMP_POSE),
         Set.of(drivetrain)

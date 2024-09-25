@@ -7,13 +7,25 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.hardware.NeoBuilder;
 import frc.robot.utils.hardware.VortexBuilder;
+import frc.robot.utils.logging.Loggable;
 
 import static frc.robot.constants.SubsystemConstants.ShooterConstants.*;
 
-public class Shooter extends SubsystemBase {
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
+
+public class Shooter extends SubsystemBase implements Loggable {
+    @AutoLog
+    public static class ShooterInputs {
+        double feedPercentage;
+        double topShooterPercentage;
+        double bottomShooterPercentage;
+    }
+
     private CANSparkFlex motor1;
     private CANSparkFlex motor2;
     private CANSparkMax feedMotor;
+    private ShooterInputsAutoLogged inputs = new ShooterInputsAutoLogged();
 
     public Shooter() {
         motor1 = VortexBuilder.create(SHOOTER_MOTOR_TOP_ID)
@@ -32,6 +44,10 @@ public class Shooter extends SubsystemBase {
             .withCurrentLimit(40)
             .withInversion(false)
             .build();
+
+        inputs.bottomShooterPercentage = 0.0;
+        inputs.topShooterPercentage = 0.0;
+        inputs.feedPercentage = 0.0;
     }
 
     public void feed(double speed) {
@@ -46,5 +62,15 @@ public class Shooter extends SubsystemBase {
     public void rev(double revSpeed) {
         motor1.set(revSpeed);
         motor2.set(revSpeed);
+    }
+
+    @Override
+    public void periodic() {
+        log("Subsystems", "Shooter");
+    }
+
+    @Override
+    public void log(String subdirectory, String humanReadableName) {
+        Logger.processInputs(subdirectory + "/" + humanReadableName, inputs);
     }
 }

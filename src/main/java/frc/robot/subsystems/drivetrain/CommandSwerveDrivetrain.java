@@ -188,7 +188,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         for(int i = 0; i < 4; i++) {
             inputs.moduleStates[i] = getModule(i).getCurrentState();
         }
-
-        Logger.processInputs("Subsystems/Drivetrain", inputs);
     }
+
+    
 }
