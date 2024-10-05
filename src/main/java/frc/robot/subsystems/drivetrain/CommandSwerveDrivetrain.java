@@ -30,6 +30,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.utils.limelight.LimelightHelpers;
+import frc.robot.utils.logging.Loggable;
+
 import static frc.robot.constants.AutoConstants.*;
 import static frc.robot.constants.UniversalConstants.isRedSide;
 import static frc.robot.constants.SubsystemConstants.LimeLightConstants.*;
@@ -38,7 +40,7 @@ import static frc.robot.constants.SubsystemConstants.LimeLightConstants.*;
  * Class that extends the Phoenix SwerveDrivetrain class and implements
  * subsystem so it can be used in command-based projects easily.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem, Loggable {
     @AutoLog
     public static class DrivetrainInputs {
         public Pose2d estimatedPose;
@@ -152,6 +154,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     @Override
+    public void log(String subdirectory, String humanReadableName) {
+        Logger.processInputs(subdirectory + "/" + humanReadableName, inputs);
+    }
+
+    @Override
     public void periodic() {
         /* Periodically try to apply the operator perspective */
         /* If we haven't applied the operator perspective before, then we should apply it regardless of DS state */
@@ -188,6 +195,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         for(int i = 0; i < 4; i++) {
             inputs.moduleStates[i] = getModule(i).getCurrentState();
         }
+
+        log("Subsystems", "Drivetrain");
     }
 
     

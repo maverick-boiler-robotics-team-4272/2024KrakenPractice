@@ -1,10 +1,10 @@
 package frc.robot.subsystems.shooter;
 
 import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.utils.hardware.Neo;
 import frc.robot.utils.hardware.NeoBuilder;
 import frc.robot.utils.hardware.VortexBuilder;
 import frc.robot.utils.logging.Loggable;
@@ -24,7 +24,7 @@ public class Shooter extends SubsystemBase implements Loggable {
 
     private CANSparkFlex motor1;
     private CANSparkFlex motor2;
-    private CANSparkMax feedMotor;
+    private Neo feedMotor;
     private ShooterInputsAutoLogged inputs = new ShooterInputsAutoLogged();
 
     public Shooter() {
@@ -71,6 +71,7 @@ public class Shooter extends SubsystemBase implements Loggable {
 
     @Override
     public void log(String subdirectory, String humanReadableName) {
+        feedMotor.log(subdirectory, humanReadableName);
         Logger.processInputs(subdirectory + "/" + humanReadableName, inputs);
     }
 }
