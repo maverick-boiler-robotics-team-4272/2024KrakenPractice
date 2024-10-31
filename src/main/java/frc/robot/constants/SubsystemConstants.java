@@ -32,4 +32,11 @@ public class SubsystemConstants {
         public static final int SHOOTER_MOTOR_BOTTOM_ID = 16;
         public static final int FEED_MOTOR_ID = 17;
     }
+
+    public static class TeleopConstants {
+        public static final double TRANSLATION_MAX = TunerConstants.kSpeedAt12VoltsMps;
+        public static final double TRANSLATION_MAX_A = 4.0;
+        public static final Rotation2d ROTATION_MAX = Rotation2d.fromDegrees(560.0);
+        public static final Rotation2d ROTATION_MAX_A = Rotation2d.fromDegrees(720.0);
+    }
 }
