@@ -31,13 +31,13 @@ public class Shooter extends SubsystemBase implements Loggable {
         motor1 = VortexBuilder.create(SHOOTER_MOTOR_TOP_ID)
             .withCurrentLimit(40)
             .withIdleMode(IdleMode.kBrake)
-            .withInversion(false)
+            .withInversion(true)
             .build();
 
         motor2 = VortexBuilder.create(SHOOTER_MOTOR_BOTTOM_ID)
             .withCurrentLimit(40)
             .withIdleMode(IdleMode.kBrake)
-            .withInversion(true)
+            .withInversion(false)
             .build();
 
         feedMotor = NeoBuilder.create(FEED_MOTOR_ID)
