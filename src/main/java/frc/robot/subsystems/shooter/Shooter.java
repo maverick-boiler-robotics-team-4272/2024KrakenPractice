@@ -3,6 +3,9 @@ package frc.robot.subsystems.shooter;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.utils.hardware.Neo;
 import frc.robot.utils.hardware.NeoBuilder;
@@ -48,6 +51,14 @@ public class Shooter extends SubsystemBase implements Loggable {
         inputs.bottomShooterPercentage = 0.0;
         inputs.topShooterPercentage = 0.0;
         inputs.feedPercentage = 0.0;
+
+        Mechanism2d mech = new Mechanism2d(30, 48);
+        var brace = new MechanismLigament2d("Brace", 18, 90);
+        mech.getRoot("Shooter", 15, 0).append(brace);
+        brace.append(new MechanismLigament2d("ShooterTop", 10, 35));
+        brace.append(new MechanismLigament2d("ShooterBottom", 5, 215));
+
+        Shuffleboard.getTab("Mechs").add("Mech", mech);
     }
 
     public void feed(double speed) {
