@@ -14,6 +14,7 @@
       "/Pose": "Field2d",
       "/Shuffleboard/Auto/Field": "Field2d",
       "/Shuffleboard/Auto/SendableChooser[0]": "String Chooser",
+      "/SmartDashboard/Mech": "Mechanism2d",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",
       "/SmartDashboard/Module 2": "Mechanism2d",
@@ -37,6 +38,9 @@
         }
       }
     }
+  },
+  "NetworkTables Info": {
+    "visible": true
   },
   "NetworkTables View": {
     "visible": false

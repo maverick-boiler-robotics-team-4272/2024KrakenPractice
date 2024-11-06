@@ -2,17 +2,16 @@ package frc.robot.utils.hardware;
 
 // Hardware
 import com.revrobotics.CANSparkBase.*;
-import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.*;
 
 public class NeoBuilder {
-    private CANSparkMax motor;
+    private Neo motor;
     private SparkPIDController motorController;
     private RelativeEncoder motorEncoder;
 
     private NeoBuilder(int id) {
-        motor = new CANSparkMax(id, MotorType.kBrushless);
+        motor = new Neo(id);
         motor.restoreFactoryDefaults();
     }
 
@@ -188,12 +187,12 @@ public class NeoBuilder {
         return this;
     }
 
-    public CANSparkMax build() {
+    public Neo build() {
         motor.burnFlash();
         return motor;
     }
 
-    public CANSparkMax getUnburntVortex() {
+    public Neo getUnburntVortex() {
         return motor;
     }
 

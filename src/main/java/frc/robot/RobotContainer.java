@@ -6,13 +6,11 @@ package frc.robot;
 
 import static frc.robot.constants.UniversalConstants.*;
 
-import java.nio.file.Paths;
 import java.util.Set;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -37,13 +35,12 @@ import frc.robot.subsystems.intake.states.IntakeState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.states.ShootState;
 
-public class RobotContainer {
-  private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
-  private double MaxAngularRate = 2.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
+import static  frc.robot.constants.SubsystemConstants.*;
 
-  private final ShuffleboardTab autoTab;
-  private final SendableChooser<Command> autoChooser;
-  private final Field2d field;
+public class RobotContainer {
+  private ShuffleboardTab autoTab;
+  private SendableChooser<Command> autoChooser;
+  private Field2d field;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
@@ -52,20 +49,16 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
-                                                               // driving in open loop
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+      .withDeadband(TeleopConstants.TRANSLATION_MAX * 0.1).withRotationalDeadband(TeleopConstants.ROTATION_MAX.getRadians() * 0.1) // Add a 10% deadband
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); 
 
-  private final Telemetry logger = new Telemetry(MaxSpeed);
+  private final Telemetry logger = new Telemetry(TeleopConstants.TRANSLATION_MAX);
 
   private void configureBindings() {
-    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with
-                                                                                           // negative Y (forward)
-            .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+    drivetrain.setDefaultCommand(
+        drivetrain.applyRequest(() -> drive.withVelocityX(-joystick.getLeftY() * TeleopConstants.TRANSLATION_MAX) // Drive forward with negative Y (forward)
+            .withVelocityY(-joystick.getLeftX() * TeleopConstants.TRANSLATION_MAX) // Drive left with negative X (left)
+            .withRotationalRate(-joystick.getRightX() * TeleopConstants.ROTATION_MAX.getRadians()) // Drive counterclockwise with negative X (left)
         ));
 
     joystick.leftTrigger(0.1).whileTrue(
@@ -76,13 +69,6 @@ public class RobotContainer {
       new IntakeFeedCommand(intake, shooter, -0.9, -0.5)
     );
 
-    joystick.a().whileTrue(drivetrain.applyRequest(
-      () -> point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-    ));
-
-    // joystick.leftBumper().whileTrue(drivetrain.applyRequest(() -> brake));
-
-    // reset the field-centric heading on left bumper press
     joystick.b().onTrue(drivetrain.reset());
 
     joystick.leftBumper().whileTrue(
@@ -102,8 +88,12 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
     registerNamedCommands();
+    setupTabs();
+    setupPathplannerLogs();
+  }
 
-    autoChooser = AutoBuilder.buildAutoChooser();
+  private void setupTabs() {
+    autoChooser = new SendableChooser<>();
 
     autoTab = Shuffleboard.getTab("Auto");
     autoTab.add(autoChooser).withSize(2, 1);
@@ -115,7 +105,9 @@ public class RobotContainer {
 
     field = new Field2d();
     autoTab.add("Field", field).withSize(6, 4);
+  }
 
+  private void setupPathplannerLogs() {
     // Logging callback for current robot pose
     PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
       // Do whatever you want with the pose here
@@ -140,7 +132,6 @@ public class RobotContainer {
     drivetrain.setLogCurrentPos((pose) -> {
       field.setRobotPose(pose);
     });
-
   }
 
   private void registerNamedCommands() {
