@@ -1,7 +1,10 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.drivetrain;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
@@ -9,6 +12,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -17,6 +21,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -25,14 +30,25 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.utils.limelight.LimelightHelpers;
+import frc.robot.utils.logging.Loggable;
 
 import static frc.robot.constants.AutoConstants.*;
+import static frc.robot.constants.UniversalConstants.isRedSide;
+import static frc.robot.constants.SubsystemConstants.LimeLightConstants.*;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
  * subsystem so it can be used in command-based projects easily.
  */
-public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem, Loggable {
+    @AutoLog
+    public static class DrivetrainInputs {
+        public Pose2d estimatedPose;
+        public SwerveModuleState moduleStates[];
+    }
+
+    DrivetrainInputsAutoLogged inputs = new DrivetrainInputsAutoLogged();
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -48,21 +64,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private Consumer<Pose2d> logCurrentPos;
 
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
-        super(driveTrainConstants, OdometryUpdateFrequency, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
-
-        initPathPlanner();
-
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e){}
-
-        SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.configure(SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE);
-    }
-
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
         if (Utils.isSimulation()) {
@@ -71,10 +72,29 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         
         initPathPlanner();
         SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.configure(SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE);
+
+        inputs.estimatedPose = new Pose2d();
+
+        inputs.moduleStates = new SwerveModuleState[4];
+        for(int i = 0; i < 4; i++) {
+            inputs.moduleStates[i] = getModule(i).getCurrentState();
+        }
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
+    }
+
+    public Command pathFind(Pose2d target) {
+        return AutoBuilder.pathfindToPose(
+            target, 
+            new PathConstraints(
+                TRANSLATION_MAX,
+                TRANSLATION_MAX_A,
+                ROTATION_MAX.getRadians(), 
+                ROTATION_MAX_A.getRadians()
+            )
+        );
     }
 
     public Command reset() {
@@ -123,11 +143,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
               // This will flip the path being followed to the red side of the field.
               // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-              }
-              return false;
+              return isRedSide();
             },
             this // Reference to this subsystem to set requirements
         );
@@ -135,6 +151,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public void setLogCurrentPos(Consumer<Pose2d> logCurrent) {
         this.logCurrentPos = logCurrent;
+    }
+
+    @Override
+    public void log(String subdirectory, String humanReadableName) {
+        Logger.processInputs(subdirectory + "/" + humanReadableName, inputs);
     }
 
     @Override
@@ -168,5 +189,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (DriverStation.isTeleop() && logCurrentPos != null) {
             logCurrentPos.accept(this.getState().Pose);
         }
+
+        inputs.estimatedPose = getState().Pose;
+
+        for(int i = 0; i < 4; i++) {
+            inputs.moduleStates[i] = getModule(i).getCurrentState();
+        }
+
+        log("Subsystems", "Drivetrain");
     }
+
+    
 }
