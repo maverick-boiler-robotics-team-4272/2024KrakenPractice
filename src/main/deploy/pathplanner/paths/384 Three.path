@@ -1,0 +1,125 @@
+{
+  "version": 1.0,
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.708089344106616,
+        "y": 4.455946929911878
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 1.5493573329488999,
+        "y": 4.1878505378632385
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.7049452297102787,
+        "y": 4.067669396600055
+      },
+      "prevControl": {
+        "x": 1.5425604895635678,
+        "y": 4.173340736613395
+      },
+      "nextControl": {
+        "x": 2.80663696462528,
+        "y": 4.058424693425964
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.6032534947952777,
+        "y": 5.519087794932347
+      },
+      "prevControl": {
+        "x": 2.1818271329495995,
+        "y": 4.796642603196899
+      },
+      "nextControl": {
+        "x": 2.9268181058884637,
+        "y": 6.073769985377809
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 8.066873070683078,
+        "y": 7.414251945621009
+      },
+      "prevControl": {
+        "x": 4.794248147054852,
+        "y": 7.210868475791006
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "384 Three End"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.95,
+      "rotationDegrees": 180.0,
+      "rotateFast": true
+    }
+  ],
+  "constraintZones": [],
+  "eventMarkers": [
+    {
+      "name": "3",
+      "waypointRelativePos": 0.75,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Intake"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "8",
+      "waypointRelativePos": 2.9,
+      "command": {
+        "type": "parallel",
+        "data": {
+          "commands": [
+            {
+              "type": "named",
+              "data": {
+                "name": "Intake"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0,
+    "rotateFast": false
+  },
+  "reversed": false,
+  "folder": "ThreeEightFour",
+  "previewStartingState": {
+    "rotation": 120.0,
+    "velocity": 0
+  },
+  "useDefaultConstraints": false
+}
