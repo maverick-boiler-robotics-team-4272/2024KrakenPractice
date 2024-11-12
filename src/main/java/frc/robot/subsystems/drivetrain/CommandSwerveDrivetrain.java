@@ -33,6 +33,7 @@ import frc.robot.utils.limelight.LimelightHelpers;
 import frc.robot.utils.logging.Loggable;
 
 import static frc.robot.constants.AutoConstants.*;
+import static frc.robot.constants.UniversalConstants.SIDE_CHOOSER;
 import static frc.robot.constants.UniversalConstants.isRedSide;
 import static frc.robot.constants.SubsystemConstants.LimeLightConstants.*;
 
@@ -166,12 +167,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         /* Otherwise, only check and apply the operator perspective if the DS is disabled */
         /* This ensures driving behavior doesn't change until an explicit disable event occurs during testing*/
         if (!hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent((allianceColor) -> {
+            if(isRedSide()) {
                 this.setOperatorPerspectiveForward(
-                        allianceColor == Alliance.Red ? RedAlliancePerspectiveRotation
-                                : BlueAlliancePerspectiveRotation);
-                hasAppliedOperatorPerspective = true;
-            });
+                    RedAlliancePerspectiveRotation
+                );
+            } else {
+                this.setOperatorPerspectiveForward(
+                    BlueAlliancePerspectiveRotation
+                );
+            }
         }
 
         LimelightHelpers.PoseEstimate limelightMeasurement = SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.getBotPoseEstimate();
