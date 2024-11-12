@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,9 +32,7 @@ import frc.robot.utils.limelight.LimelightHelpers;
 import frc.robot.utils.logging.Loggable;
 
 import static frc.robot.constants.AutoConstants.*;
-import static frc.robot.constants.UniversalConstants.SIDE_CHOOSER;
 import static frc.robot.constants.UniversalConstants.isRedSide;
-import static frc.robot.constants.SubsystemConstants.LimeLightConstants.*;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
