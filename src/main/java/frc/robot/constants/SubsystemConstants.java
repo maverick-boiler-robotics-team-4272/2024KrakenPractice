@@ -24,7 +24,7 @@ public class SubsystemConstants {
                 Rotation2d.fromDegrees(180).getRadians()
             )
         );
-        public static LimeLight FRONT_LIMELIGHT = new LimeLight("limelight-back");
+        public static LimeLight FRONT_LIMELIGHT = new LimeLight("limelight-front");
     }
 
     public static class ShooterConstants {
