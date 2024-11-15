@@ -19,7 +19,7 @@ public class SubsystemConstants {
             0.223797,
             new Rotation3d(
                 0, 
-                0.3507, 
+                0.3507, // 20 degrees
                 // Rotation2d.fromDegrees(10).getRadians()
                 Rotation2d.fromDegrees(180).getRadians()
             )
