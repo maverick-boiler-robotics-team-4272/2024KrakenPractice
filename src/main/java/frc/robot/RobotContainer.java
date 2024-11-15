@@ -114,8 +114,15 @@ public class RobotContainer {
         Set.of(drivetrain)
       ));
 
-      NamedCommands.registerCommand("RotLock", new InstantCommand(drivetrain::overrideRotation));
-      NamedCommands.registerCommand("UnRotLock", new InstantCommand(drivetrain::unOverrideRotation));
+      NamedCommands.registerCommand("RotLockSpeaker", new InstantCommand(() -> {
+        drivetrain.setRotLockPose(getAlliancePositions().SHOT_POSITION);
+        drivetrain.overrideRotation();
+      }));
+      NamedCommands.registerCommand("RotLockAmp", new InstantCommand(() -> {
+        drivetrain.setRotLockPose(getAlliancePositions().AMP_POSE);
+        drivetrain.overrideRotation();
+      }));
+      NamedCommands.registerCommand("UnLock", new InstantCommand(drivetrain::unOverrideRotation));
   }
 
   public Command getAutonomousCommand() {
