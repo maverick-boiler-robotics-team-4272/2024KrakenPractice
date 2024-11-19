@@ -18,9 +18,33 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "RotLockSpeaker"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Circle"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RotLockAmp"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Circle"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "UnLock"
           }
         },
         {

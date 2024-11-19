@@ -4,7 +4,6 @@ import static frc.robot.constants.UniversalConstants.isRedSide;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.wpilibj.DriverStation;
 
 public class LimeLight {
     private String tableName;
@@ -26,11 +25,17 @@ public class LimeLight {
             cameraOffset.getZ()
         );
 
+        LimelightHelpers.setPipelineIndex(tableName, 0);
+        LimelightHelpers.setLEDMode_PipelineControl(tableName);
         LimelightHelpers.setLEDMode_ForceOff(tableName);
     }
 
     public void turnOnLeds() {
         LimelightHelpers.setLEDMode_ForceOn(tableName);
+    }
+
+    public void setRobotOrientation(double yaw) {
+        LimelightHelpers.SetRobotOrientation(tableName, yaw, 0.0, 0.0, 0.0, 0.0, 0.0);
     }
 
     public Pose2d getBotPose() {

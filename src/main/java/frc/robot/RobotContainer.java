@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.IntakeFeedCommand;
 import frc.robot.commands.ShootCommand;
@@ -40,7 +41,6 @@ import static  frc.robot.constants.SubsystemConstants.*;
 public class RobotContainer {
   private ShuffleboardTab autoTab;
   private SendableChooser<Command> autoChooser;
-  private Field2d field;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
@@ -89,7 +89,6 @@ public class RobotContainer {
     configureBindings();
     registerNamedCommands();
     setupTabs();
-    setupPathplannerLogs();
   }
 
   private void setupTabs() {
@@ -103,39 +102,9 @@ public class RobotContainer {
     autoChooser.addOption("Three Note Intake", new PathPlannerAuto("Three Note Intake"));
     autoChooser.addOption("LimeLightTest", new PathPlannerAuto("LimeLightTest"));
 
-    field = new Field2d();
-    autoTab.add("Field", field).withSize(6, 4);
-
     SIDE_CHOOSER.addOption("Red", "red");
     SIDE_CHOOSER.setDefaultOption("Blue", "blue");
     autoTab.add("Side", SIDE_CHOOSER);
-  }
-
-  private void setupPathplannerLogs() {
-    // Logging callback for current robot pose
-    PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
-      // Do whatever you want with the pose here
-      if(DriverStation.isAutonomousEnabled())
-        field.setRobotPose(pose);
-    });
-
-    // Logging callback for target robot pose
-    PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
-        // Do whatever you want with the pose here
-        if(DriverStation.isAutonomousEnabled()) {
-          field.getObject("target pose").setPose(pose);
-        }
-    });
-
-    // Logging callback for the active path, this is sent as a list of poses
-    PathPlannerLogging.setLogActivePathCallback((poses) -> {
-        // Do whatever you want with the poses here
-        field.getObject("path").setPoses(poses);
-    });
-
-    drivetrain.setLogCurrentPos((pose) -> {
-      field.setRobotPose(pose);
-    });
   }
 
   private void registerNamedCommands() {
@@ -144,6 +113,16 @@ public class RobotContainer {
         ()->drivetrain.pathFind(getAlliancePositions().AMP_POSE),
         Set.of(drivetrain)
       ));
+
+      NamedCommands.registerCommand("RotLockSpeaker", new InstantCommand(() -> {
+        drivetrain.setRotLockPose(getAlliancePositions().SHOT_POSITION);
+        drivetrain.overrideRotation();
+      }));
+      NamedCommands.registerCommand("RotLockAmp", new InstantCommand(() -> {
+        drivetrain.setRotLockPose(getAlliancePositions().AMP_POSE);
+        drivetrain.overrideRotation();
+      }));
+      NamedCommands.registerCommand("UnLock", new InstantCommand(drivetrain::unOverrideRotation));
   }
 
   public Command getAutonomousCommand() {

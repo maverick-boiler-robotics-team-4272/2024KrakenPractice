@@ -1,6 +1,6 @@
 package frc.robot.subsystems.drivetrain;
 
-import java.util.function.Consumer;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLog;
@@ -12,6 +12,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -23,9 +24,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.constants.SubsystemConstants;
@@ -33,8 +34,10 @@ import frc.robot.utils.limelight.LimelightHelpers;
 import frc.robot.utils.logging.Loggable;
 
 import static frc.robot.constants.AutoConstants.*;
+import static frc.robot.constants.SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT;
+import static frc.robot.constants.SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE;
+import static frc.robot.constants.UniversalConstants.getAlliancePositions;
 import static frc.robot.constants.UniversalConstants.isRedSide;
-import static frc.robot.constants.SubsystemConstants.LimeLightConstants.*;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
@@ -43,15 +46,34 @@ import static frc.robot.constants.SubsystemConstants.LimeLightConstants.*;
 public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem, Loggable {
     @AutoLog
     public static class DrivetrainInputs {
-        public Pose2d estimatedPose;
-        public SwerveModuleState moduleStates[];
+        public Pose2d estimatedPose; // The Fused Pose of the robot
+        public SwerveModuleState moduleStates[]; // The module states of the robot
+
+        public boolean isPathFinding; // is the robot driving itself
+        public boolean fuseVison; // Is the odometry fusing
+        public boolean overrideRotation; // Is the path following rotation overriden
+        public double distanceTraveled; // How much distance has the robot traveled
+        public double distanceTraveledFromTagRead; // How much distance has the robot traveled since last apriltag read
+        public double tagDistance;
+
+        public Pose2d limelightPose; //TODO: Move this to limelight periodic
     }
 
+    // Logging inputs
     DrivetrainInputsAutoLogged inputs = new DrivetrainInputsAutoLogged();
 
+    /*
+     * This is just some simulation stuff...
+     */
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    // Last periodic loop time
+    private double lastPeriodicTime = 0.0;
+
+    // Last distance seen a apriltag
+    private double lastDistance = 0.0;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
@@ -60,9 +82,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean hasAppliedOperatorPerspective = false;
 
-    private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
+    // The pose to rotlock to
+    private Pose2d rotLockPose;
 
-    private Consumer<Pose2d> logCurrentPos;
+    // The request for autos driving
+    private final SwerveRequest.ApplyChassisSpeeds AutoRequest = new SwerveRequest.ApplyChassisSpeeds();
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
@@ -71,21 +95,37 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
         
         initPathPlanner();
-        SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.configure(SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE);
+        FRONT_LIMELIGHT.configure(FRONT_LIMELIGHT_POSE);
 
         inputs.estimatedPose = new Pose2d();
+        inputs.limelightPose = new Pose2d();
 
         inputs.moduleStates = new SwerveModuleState[4];
         for(int i = 0; i < 4; i++) {
             inputs.moduleStates[i] = getModule(i).getCurrentState();
         }
+
+        inputs.isPathFinding = false;
+        inputs.fuseVison = false;
+        inputs.overrideRotation = false;
+        inputs.distanceTraveledFromTagRead = 0.0;
+        inputs.distanceTraveled = 0.0;
+        inputs.tagDistance = 0.0;
+
+        rotLockPose = getAlliancePositions().SHOT_POSITION;
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
+        inputs.isPathFinding = false;
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
+    /**
+     * Path find to a pose
+     * @param target to go to
+     */
     public Command pathFind(Pose2d target) {
+        inputs.isPathFinding = true;
         return AutoBuilder.pathfindToPose(
             target, 
             new PathConstraints(
@@ -97,6 +137,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         );
     }
 
+    /**
+     * Reset The robot heading
+     */
     public Command reset() {
         return runOnce(
             () -> {
@@ -106,6 +149,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         );
     }
 
+    //Sim stuff
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 
@@ -123,6 +167,30 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public ChassisSpeeds getCurrentChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
+    }
+
+    /**
+     * Set the pose to rotlock to
+     * @param pose to set to
+     */
+    public void setRotLockPose(Pose2d pose) {
+        this.rotLockPose = pose;
+    }
+
+    public void overrideRotation() {
+        inputs.overrideRotation = true;
+    }
+    
+    public void unOverrideRotation() {
+        inputs.overrideRotation = false;
+    }
+    
+    private Optional<Rotation2d> getRotationTargetOverride() {
+        if(inputs.overrideRotation) {
+            return Optional.of(rotLockPose.getTranslation().minus(getState().Pose.getTranslation()).getAngle());
+        } else {
+            return Optional.empty();
+        }
     }
 
     private void initPathPlanner() {
@@ -147,10 +215,33 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             },
             this // Reference to this subsystem to set requirements
         );
+
+        PPHolonomicDriveController.setRotationTargetOverride(this::getRotationTargetOverride);
     }
 
-    public void setLogCurrentPos(Consumer<Pose2d> logCurrent) {
-        this.logCurrentPos = logCurrent;
+    private void fuseOdometry() {
+        FRONT_LIMELIGHT.setRobotOrientation(m_pigeon2.getAngle());
+
+        LimelightHelpers.PoseEstimate limelightMeasurement = SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.getBotPoseEstimate();
+
+        if(limelightMeasurement != null) {
+            if(limelightMeasurement.tagCount >= 1 && limelightMeasurement.avgTagDist < 4.0) {
+                setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+                addVisionMeasurement(
+                    limelightMeasurement.pose,
+                    limelightMeasurement.timestampSeconds
+                );
+
+                lastDistance = inputs.distanceTraveled;
+                inputs.fuseVison = true;
+            } else {
+                inputs.fuseVison = false;
+            }
+
+            inputs.tagDistance = limelightMeasurement.avgTagDist;
+        }
+
+        inputs.limelightPose = limelightMeasurement.pose;
     }
 
     @Override
@@ -160,35 +251,29 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     @Override
     public void periodic() {
-        /* Periodically try to apply the operator perspective */
-        /* If we haven't applied the operator perspective before, then we should apply it regardless of DS state */
-        /* This allows us to correct the perspective in case the robot code restarts mid-match */
-        /* Otherwise, only check and apply the operator perspective if the DS is disabled */
-        /* This ensures driving behavior doesn't change until an explicit disable event occurs during testing*/
         if (!hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-            DriverStation.getAlliance().ifPresent((allianceColor) -> {
+            if(isRedSide()) {
                 this.setOperatorPerspectiveForward(
-                        allianceColor == Alliance.Red ? RedAlliancePerspectiveRotation
-                                : BlueAlliancePerspectiveRotation);
-                hasAppliedOperatorPerspective = true;
-            });
-        }
-
-        LimelightHelpers.PoseEstimate limelightMeasurement = SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT.getBotPoseEstimate();
-
-        if(limelightMeasurement != null) {
-            if(limelightMeasurement.tagCount >= 2) {
-                setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-                addVisionMeasurement(
-                    limelightMeasurement.pose,
-                    limelightMeasurement.timestampSeconds
+                    RedAlliancePerspectiveRotation
+                );
+            } else {
+                this.setOperatorPerspectiveForward(
+                    BlueAlliancePerspectiveRotation
                 );
             }
         }
 
-        if (DriverStation.isTeleop() && logCurrentPos != null) {
-            logCurrentPos.accept(this.getState().Pose);
-        }
+        fuseOdometry();
+
+        double deltaTime = Timer.getFPGATimestamp() - lastPeriodicTime;
+        lastPeriodicTime = Timer.getFPGATimestamp();
+
+        inputs.distanceTraveled += Math.sqrt(
+            Math.pow(getState().speeds.vxMetersPerSecond, 2) +
+            Math.pow(getState().speeds.vyMetersPerSecond, 2)
+        ) * deltaTime;
+
+        inputs.distanceTraveledFromTagRead = inputs.distanceTraveled - lastDistance;
 
         inputs.estimatedPose = getState().Pose;
 
@@ -198,6 +283,4 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         log("Subsystems", "Drivetrain");
     }
-
-    
 }
