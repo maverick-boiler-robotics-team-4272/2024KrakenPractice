@@ -105,6 +105,10 @@ public class RobotContainer {
 
     field = new Field2d();
     autoTab.add("Field", field).withSize(6, 4);
+
+    SIDE_CHOOSER.addOption("Red", "red");
+    SIDE_CHOOSER.setDefaultOption("Blue", "blue");
+    autoTab.add("Side", SIDE_CHOOSER);
   }
 
   private void setupPathplannerLogs() {

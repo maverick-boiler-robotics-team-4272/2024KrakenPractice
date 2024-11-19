@@ -3,6 +3,7 @@ package frc.robot.constants;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class UniversalConstants {
     private UniversalConstants() {
@@ -19,12 +20,14 @@ public class UniversalConstants {
 
     public static final PositionsContainer RED_POSITIONS = new PositionsContainer("Red");
     public static final PositionsContainer BLUE_POSITIONS = new PositionsContainer("Blue");
+    public static SendableChooser<String> SIDE_CHOOSER = new SendableChooser<>();
 
     public static boolean isRedSide() {
-        if(!DriverStation.isDSAttached()) {
-            return false;
+        if(SIDE_CHOOSER.getSelected() == "red") {
+            return true;
         }
-        return DriverStation.getAlliance().get() == DriverStation.Alliance.Red;
+
+        return  false;
     }
 
     public static PositionsContainer getAlliancePositions() {
