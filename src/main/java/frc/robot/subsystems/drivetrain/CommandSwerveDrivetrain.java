@@ -16,6 +16,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.VecBuilder;
@@ -34,6 +35,8 @@ import frc.robot.utils.limelight.LimelightHelpers;
 import frc.robot.utils.logging.Loggable;
 
 import static frc.robot.constants.AutoConstants.*;
+import static frc.robot.constants.SubsystemConstants.LimeLightConstants.BACK_LIMELIGHT;
+import static frc.robot.constants.SubsystemConstants.LimeLightConstants.BACK_LIMELIGHT_POSE;
 import static frc.robot.constants.SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT;
 import static frc.robot.constants.SubsystemConstants.LimeLightConstants.FRONT_LIMELIGHT_POSE;
 import static frc.robot.constants.UniversalConstants.getAlliancePositions;
@@ -47,9 +50,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     @AutoLog
     public static class DrivetrainInputs {
         public Pose2d estimatedPose; // The Fused Pose of the robot
+        public Pose2d notePose;
         public SwerveModuleState moduleStates[]; // The module states of the robot
 
-        public boolean isPathFinding; // is the robot driving itself
+        // public boolean isPathFinding; // is the robot driving itself
         public boolean fuseVison; // Is the odometry fusing
         public boolean overrideRotation; // Is the path following rotation overriden
         public double distanceTraveled; // How much distance has the robot traveled
@@ -99,13 +103,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         inputs.estimatedPose = new Pose2d();
         inputs.limelightPose = new Pose2d();
+        inputs.notePose = new Pose2d();
 
         inputs.moduleStates = new SwerveModuleState[4];
         for(int i = 0; i < 4; i++) {
             inputs.moduleStates[i] = getModule(i).getCurrentState();
         }
 
-        inputs.isPathFinding = false;
         inputs.fuseVison = false;
         inputs.overrideRotation = false;
         inputs.distanceTraveledFromTagRead = 0.0;
@@ -116,7 +120,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
-        inputs.isPathFinding = false;
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
@@ -125,7 +128,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
      * @param target to go to
      */
     public Command pathFind(Pose2d target) {
-        inputs.isPathFinding = true;
         return AutoBuilder.pathfindToPose(
             target, 
             new PathConstraints(
@@ -190,6 +192,20 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             return Optional.of(rotLockPose.getTranslation().minus(getState().Pose.getTranslation()).getAngle());
         } else {
             return Optional.empty();
+        }
+    }
+
+    private void findNote() {
+        if(BACK_LIMELIGHT.getTV()) {
+            double dy = BACK_LIMELIGHT_POSE.getZ() * Rotation2d.fromRadians(BACK_LIMELIGHT_POSE.getRotation().getY()).plus(Rotation2d.fromDegrees(BACK_LIMELIGHT.getTY())).getTan();
+            double dx = dy * Rotation2d.fromDegrees(BACK_LIMELIGHT.getTX()).getTan();
+
+            Pose2d ePose = inputs.estimatedPose;
+
+            double nx = ePose.getX() - dy * ePose.getRotation().getCos() - dx * ePose.getRotation().getSin();
+            double ny = ePose.getY() - dy * ePose.getRotation().getSin() + dx * ePose.getRotation().getCos();
+
+            inputs.notePose = new Pose2d(nx, ny, new Rotation2d(0));
         }
     }
 
@@ -280,6 +296,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         for(int i = 0; i < 4; i++) {
             inputs.moduleStates[i] = getModule(i).getCurrentState();
         }
+
+        findNote();
 
         log("Subsystems", "Drivetrain");
     }
