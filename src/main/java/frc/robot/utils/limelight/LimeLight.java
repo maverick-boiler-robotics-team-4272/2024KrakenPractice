@@ -45,4 +45,16 @@ public class LimeLight {
     public LimelightHelpers.PoseEstimate getBotPoseEstimate() {
         return (!isRedSide()) ? LimelightHelpers.getBotPoseEstimate_wpiBlue(tableName) : LimelightHelpers.getBotPoseEstimate_wpiRed(tableName);
     }
+
+    public boolean getTV() {
+        return LimelightHelpers.getTV(tableName);
+    }
+
+    public double getTY() {
+        return LimelightHelpers.getTY(tableName);
+    }
+
+    public double getTX() {
+        return LimelightHelpers.getTX(tableName);
+    }
 }
