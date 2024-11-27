@@ -100,6 +100,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         
         initPathPlanner();
         FRONT_LIMELIGHT.configure(FRONT_LIMELIGHT_POSE);
+        BACK_LIMELIGHT.configure(BACK_LIMELIGHT_POSE);
 
         inputs.estimatedPose = new Pose2d();
         inputs.limelightPose = new Pose2d();
