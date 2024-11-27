@@ -4,6 +4,7 @@ import static frc.robot.constants.UniversalConstants.isRedSide;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 public class LimeLight {
     private String tableName;
@@ -20,9 +21,9 @@ public class LimeLight {
             cameraOffset.getX(), 
             cameraOffset.getY(), 
             cameraOffset.getZ(), 
-            cameraOffset.getRotation().getX(), 
-            cameraOffset.getRotation().getY(), 
-            cameraOffset.getZ()
+            Rotation2d.fromRadians(cameraOffset.getRotation().getX()).getDegrees(), 
+            Rotation2d.fromRadians(cameraOffset.getRotation().getY()).getDegrees(), 
+            Rotation2d.fromRadians(cameraOffset.getRotation().getZ()).getDegrees()
         );
 
         LimelightHelpers.setPipelineIndex(tableName, 0);
