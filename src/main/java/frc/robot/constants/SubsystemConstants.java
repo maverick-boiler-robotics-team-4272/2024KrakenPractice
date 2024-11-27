@@ -21,17 +21,18 @@ public class SubsystemConstants {
                 0, 
                 0.3507, // 20 degrees
                 // Rotation2d.fromDegrees(10).getRadians()
-                Rotation2d.fromDegrees(180).getRadians()
+                // Rotation2d.fromDegrees(180).getRadians()
+                0
             )
         );
 
         public static Pose3d BACK_LIMELIGHT_POSE = new Pose3d(
             0.0,
-            0.175,
-            0.4,
+            -0.246,
+            0.436,
             new Rotation3d(
                 0,
-                Rotation2d.fromDegrees(-10).getRadians(),
+                Rotation2d.fromDegrees(15.0).getRadians(), // upside down
                 0
             )
         );
